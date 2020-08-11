@@ -1,0 +1,91 @@
+第一天学习swoole
+2020年6月4日 晚上21：45
+
+什么是swoole?
+1.swoole是php异步，并行，高性能网络通信引擎，使用纯C语言编写（C++），提供了PHP语言的异步多线程服务器。
+2.异步TCP/UDP网络客户端，异步Mysql,Redis数据库连接池，AsyncTask,消息队列，毫秒定时器，异步文件读写，异步DNS查询。
+3.swoole内置了Http/Websocket服务端/客户端，Http2.0服务端
+
+swoole提供的功能库
+1.http服务，编写一个简单的web server。TCP/UDP服务，编写一个消息接收处理系统。
+2.异步，可以异步处理请求。并发，可以并发的处理同一个业务逻辑。
+3。协程，相比线程更稳定和好用。socket,socket通讯处理技术。
+4.毫秒级别定时器，可以在php中石油定时器了。
+
+搭建环境
+服务器版本：centos
+服务器环境：php+nignx+swoole
+php版本：7.1^
+
+技术基础
+1.具备基本的php业务开发能力
+2.linux基础命令操作
+
+课程范围
+1.快速了解及上手
+2.想要进阶的中高级程序员
+
+swoole安装
+1.下载swoole
+命令行： wget https://pecl.php.net/get/swoole-4.2.0.tgz
+2.安装依赖
+命令行： yum -y install gcc gcc-c++ autoconf pcre-devel make
+3.编译
+命令行：phpize
+命令行：./configure
+命令行：make install
+4.配置
+编译成功后，修改php.ini加入extension=swoole.so(注意这里是swoole.so拓展地址)
+5.测试
+在终端输入php -m 查看swoole拓展是否可用，或者打印phpinfo()。
+
+创建server.php文件
+server.php示例代码：
+<?php
+$server = new Swoole\Server('0.0.0.0', 9500);
+
+$server->set(array(
+    'worker_num' => 4,
+    'daemonsize' => true, // 后台运行即守护进程化
+    'backlog' => 128
+));
+
+// 事件驱动 (连接)
+$server->on('connect', function() {
+    var_dump('连接成功'); // 连接成功
+});
+
+$server->on('receive', function() {
+    
+});
+
+$server->on('close', function() {
+    
+});
+
+// 启动服务器
+$server->start();
+
+
+linux下查看服务进程
+命令行 : netstat -apn | grep 9500 （在Linux终端通过管道查看9500端口是否有服务进程在运行）
+
+创建client.php文件
+client.php示例代码：
+<?php
+
+/*
+ *  TCP常用场景
+ *  硬件设备交互，消息通讯
+*/
+
+$client = new Swoole\Client(SWOOLE_SOCK_TCP,SWOOLE_SOCK_SYNC); // TCP,异步
+
+if ($client->connect('47.98.147.49',9500)) {
+    $client->send('hello world');
+}
+
+$response = $client->recv();
+echo $response.PHP.EOL;
+$client->close();
+
